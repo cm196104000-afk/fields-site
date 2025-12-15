@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Consulta de Fields</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  padding: 20px;
+}
+input {
+  padding: 10px;
+  width: 260px;
+}
+button {
+  padding: 10px;
+  cursor: pointer;
+}
+.card {
+  background: #fff;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🔎 Consulta de Fields por Região</h2>
+
+<input id="busca" placeholder="Digite a região (ex: RJ1, BA2, SPBT)">
+<button onclick="buscar()">Buscar</button>
+
+<div id="resultado"></div>
+
+<script>
+const fields = [
+  {
+    nome: "Arthur Caldeirani",
+    funcao: "Field",
+    origem: "RJ1",
+    turno: "13h20 - 21h00",
+    telefone: "(11) 97374-4452",
+    email: "arthur.caldeirani@shopee.com"
+  },
+  {
+    nome: "Cleuber Martins",
+    funcao: "Field",
+    origem: "RJ1",
+    turno: "13h20 - 21h00",
+    telefone: "(11) 99157-8940",
+    email: "cleuber.martins@shopee.com"
+  },
+  {
+    nome: "Douglas Lima",
+    funcao: "Field",
+    origem: "RJ2",
+    turno: "06h00 - 14h30",
+    telefone: "(11) 99033-3408",
+    email: "douglas.lima@shopee.com"
+  }
+];
+
+function buscar() {
+  const valor = document.getElementById("busca").value.toUpperCase();
+  const resultado = document.getElementById("resultado");
+  resultado.innerHTML = "";
+
+  const filtrados = fields.filter(f => f.origem.includes(valor));
+
+  if (filtrados.length === 0) {
+    resultado.innerHTML = "<p>Nenhum field encontrado.</p>";
+    return;
+  }
+
+  filtrados.forEach(f => {
+    resultado.innerHTML += `
+      <div class="card">
+        <strong>${f.nome}</strong><br>
+        Função: ${f.funcao}<br>
+        Região: ${f.origem}<br>
+        Turno: ${f.turno}<br>
+        📞 ${f.telefone}<br>
+        ✉️ ${f.email}
+      </div>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>
