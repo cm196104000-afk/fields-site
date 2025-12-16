@@ -51,6 +51,111 @@ input {
 }
 
 .suggestions div:hover {
-  background: #f0f0
+  background: #f0f0f0;
+}
+
+.card {
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 12px;
+  border-left: 5px solid #4f46e5;
+}
+
+.empty {
+  text-align: center;
+  color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>🔍 Buscar Field por Região</h1>
+
+  <input id="search" placeholder="Digite a cidade..." autocomplete="off">
+  <div id="suggestions" class="suggestions"></div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+function normalizar(txt) {
+  return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/* CIDADE → SIGLA */
+const cidades = {
+  "Duque de Caxias": "RJ3",
+  "São João do Meriti": "RJ1",
+  "Campo Grande": "RJ2",
+  "Cabo Frio": "RJ3",
+  "Hidrolândia": "GO1",
+  "Goiânia": "GO1",
+  "Vila Velha": "ES1"
+};
+
+/* FIELDS */
+const fields = [
+  { nome: "Douglas Lima", regiao: "RJ2", turno: "06h00 - 14h30", tel: "(11) 99033-3408", email: "douglas.lima@shopee.com" },
+  { nome: "Fabiano Rodrigues", regiao: "RJ2", turno: "05h30 - 13h20", tel: "(21) 97097-0612", email: "fabiano.rodrigues@shopee.com" },
+  { nome: "Arthur Caldeirani", regiao: "RJ1", turno: "13h20 - 21h00", tel: "(11) 97374-4452", email: "arthur.caldeirani@shopee.com" },
+  { nome: "Carolina Cruz", regiao: "RJ3", turno: "13h20 - 21h00", tel: "(21) 99787-2831", email: "carolina.cruz@shopee.com" },
+  { nome: "Alanna Matos", regiao: "GO1", turno: "13h20 - 22h00", tel: "(11) 91320-9476", email: "alanna.matos@shopee.com" }
+];
+
+const input = document.getElementById("search");
+const suggestions = document.getElementById("suggestions");
+const results = document.getElementById("results");
+
+input.addEventListener("input", () => {
+  const value = normalizar(input.value);
+  suggestions.innerHTML = "";
+  results.innerHTML = "";
+
+  if (!value) return;
+
+  Object.keys(cidades).forEach(cidade => {
+    if (normalizar(cidade).includes(value)) {
+      const div = document.createElement("div");
+      div.textContent = cidade;
+      div.onclick = () => selecionarCidade(cidade);
+      suggestions.appendChild(div);
+    }
+  });
+});
+
+function selecionarCidade(cidade) {
+  input.value = cidade;
+  suggestions.innerHTML = "";
+  mostrarFields(cidade);
+}
+
+function mostrarFields(cidade) {
+  results.innerHTML = "";
+  const sigla = cidades[cidade];
+  const lista = fields.filter(f => f.regiao === sigla);
+
+  if (!lista.length) {
+    results.innerHTML = "<p class='empty'>Nenhum field encontrado.</p>";
+    return;
+  }
+
+  lista.forEach(f => {
+    results.innerHTML += `
+      <div class="card">
+        <strong>${f.nome}</strong><br>
+        Turno: ${f.turno}<br>
+        📞 ${f.tel}<br>
+        ✉️ ${f.email}
+      </div>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>
 
 
