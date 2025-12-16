@@ -1,223 +1,56 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Consulta de Fields</title>
+<meta charset="UTF-8">
+<title>Consulta de Fields</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: linear-gradient(135deg, #f2f4f8, #e6e9f0);
-      min-height: 100vh;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 650px;
-      background: #fff;
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      outline: none;
-      margin-bottom: 25px;
-    }
-
-    input:focus {
-      border-color: #4f46e5;
-    }
-
-    .card {
-      background: #f9fafb;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 12px;
-      border-left: 5px solid #4f46e5;
-    }
-
-    .card strong {
-      font-size: 16px;
-    }
-
-    .empty {
-      text-align: center;
-      color: #666;
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="container">
-  <h1>🔍 Buscar Field por Região</h1>
-
-  <input
-    id="search"
-    placeholder="Digite a cidade (ex: Hidrolândia, Duque de Caxias)"
-  />
-
-  <div id="results"></div>
-</div>
-
-<script>
-/* ===============================
-   NORMALIZA TEXTO (ACENTOS)
-================================ */
-function normalizar(texto) {
-  return texto
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #eef2f7, #d9e2ec);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* ===============================
-   MAPA CIDADE → SIGLA
-================================ */
-const cidadeParaSigla = {
-  "duque de caxias": "RJ3",
-  "sao joao do meriti": "RJ1",
-  "campo grande": "RJ2",
-  "cabo frio": "RJ3",
+.container {
+  width: 100%;
+  max-width: 650px;
+  background: white;
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
 
-  "goiania": "GO1",
-  "hidrolandia": "GO1",
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-  "blumenau": "SC1",
-  "criciuma": "SC1",
-  "florianopolis": "SC1",
-  "itajai": "SC1",
-  "joinville": "SC1",
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
 
-  "camacari": "BA2",
-  "paulo afonso": "BA2",
-  "ribeira pombal": "BA2",
-  "rio real": "BA2",
-  "simoes filho": "BA2",
+.suggestions {
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 160px;
+  overflow-y: auto;
+}
 
-  "carpina": "PE2",
-  "jaboatao dos guararapes": "PE2",
+.suggestions div {
+  padding: 10px;
+  cursor: pointer;
+}
 
-  "betim": "MG2",
-  "juiz de fora": "MG2",
-  "sete lagoas": "MG2",
-  "uberlandia": "MG2",
-
-  "vila velha": "ES1",
-
-  "maringa": "PR1",
-  "campina grande do sul": "PR1",
-  "londrina": "PR1",
-  "ponta grossa": "PR1"
-};
-
-/* ===============================
-   FIELDS
-================================ */
-const fields = [
-  {
-    nome: "Douglas Lima",
-    funcao: "Field",
-    regiao: "RJ2",
-    turno: "06h00 - 14h30",
-    telefone: "(11) 99033-3408",
-    email: "douglas.lima@shopee.com"
-  },
-  {
-    nome: "Fabiano Rodrigues",
-    funcao: "Field",
-    regiao: "RJ2",
-    turno: "05h30 - 13h20",
-    telefone: "(21) 97097-0612",
-    email: "fabiano.rodrigues@shopee.com"
-  },
-  {
-    nome: "Arthur Caldeirani",
-    funcao: "Field",
-    regiao: "RJ1",
-    turno: "13h20 - 21h00",
-    telefone: "(11) 97374-4452",
-    email: "arthur.caldeirani@shopee.com"
-  },
-  {
-    nome: "Carolina Cruz",
-    funcao: "Field",
-    regiao: "RJ3",
-    turno: "13h20 - 21h00",
-    telefone: "(21) 99787-2831",
-    email: "carolina.cruz@shopee.com"
-  },
-  {
-    nome: "Alanna Matos",
-    funcao: "Field",
-    regiao: "GO1",
-    turno: "13h20 - 22h00",
-    telefone: "(11) 91320-9476",
-    email: "alanna.matos@shopee.com"
-  }
-];
-
-/* ===============================
-   BUSCA
-================================ */
-const input = document.getElementById("search");
-const results = document.getElementById("results");
-
-input.addEventListener("input", () => {
-  const valor = normalizar(input.value);
-  results.innerHTML = "";
-
-  if (!valor) return;
-
-  const sigla = cidadeParaSigla[valor];
-
-  if (!sigla) {
-    results.innerHTML = "<p class='empty'>Região não encontrada.</p>";
-    return;
-  }
-
-  const encontrados = fields.filter(f => f.regiao === sigla);
-
-  if (!encontrados.length) {
-    results.innerHTML = "<p class='empty'>Nenhum field para essa região.</p>";
-    return;
-  }
-
-  encontrados.forEach(f => {
-    results.innerHTML += `
-      <div class="card">
-        <strong>${f.nome}</strong><br/>
-        Função: ${f.funcao}<br/>
-        Turno: ${f.turno}<br/>
-        📞 ${f.telefone}<br/>
-        ✉️ ${f.email}
-      </div>
-    `;
-  });
-});
-</script>
-
-</body>
-</html>
+.suggestions div:hover {
+  background: #f0f0
 
 
