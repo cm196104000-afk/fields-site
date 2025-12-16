@@ -2,43 +2,95 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Fields por Região</title>
+  <title>Consulta de Fields</title>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
+    * {
+      box-sizing: border-box;
     }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #f2f4f8, #e6e9f0);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
     h1 {
       text-align: center;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
       margin-bottom: 20px;
     }
-    .card {
-      background: #fff;
-      padding: 15px;
-      margin-bottom: 12px;
-      border-radius: 6px;
-      box-shadow: 0 2px 5px rgba(0,0,0,.1);
+
+    input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      margin-bottom: 25px;
     }
+
+    input:focus {
+      border-color: #4f46e5;
+    }
+
+    .card {
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border-left: 5px solid #4f46e5;
+    }
+
+    .card strong {
+      font-size: 16px;
+    }
+
     .empty {
       text-align: center;
-      color: #777;
+      color: #666;
     }
   </style>
 </head>
+
 <body>
 
-<h1>🔎 Buscar Field por Região</h1>
-<input id="search" placeholder="Digite a cidade ou região (ex: Hidrolândia, Duque de Caxias)" />
+<div class="container">
+  <h1>🔍 Buscar Field por Região</h1>
 
-<div id="results"></div>
+  <input
+    id="search"
+    placeholder="Digite a cidade (ex: Hidrolândia, Duque de Caxias)"
+  />
+
+  <div id="results"></div>
+</div>
 
 <script>
+/* ===============================
+   NORMALIZA TEXTO (ACENTOS)
+================================ */
+function normalizar(texto) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 /* ===============================
    MAPA CIDADE → SIGLA
 ================================ */
@@ -57,7 +109,7 @@ const cidadeParaSigla = {
   "itajai": "SC1",
   "joinville": "SC1",
 
-  "camaçari": "BA2",
+  "camacari": "BA2",
   "paulo afonso": "BA2",
   "ribeira pombal": "BA2",
   "rio real": "BA2",
@@ -65,9 +117,6 @@ const cidadeParaSigla = {
 
   "carpina": "PE2",
   "jaboatao dos guararapes": "PE2",
-
-  "goiania": "GO1",
-  "hidrolandia": "GO1",
 
   "betim": "MG2",
   "juiz de fora": "MG2",
@@ -83,7 +132,7 @@ const cidadeParaSigla = {
 };
 
 /* ===============================
-   LISTA COMPLETA DE FIELDS
+   FIELDS
 ================================ */
 const fields = [
   {
@@ -103,28 +152,12 @@ const fields = [
     email: "fabiano.rodrigues@shopee.com"
   },
   {
-    nome: "Tiago Serafim",
-    funcao: "Field",
-    regiao: "RJ2",
-    turno: "05h30 - 13h20",
-    telefone: "(21) 97097-0612",
-    email: "tiago.serafim@shopee.com"
-  },
-  {
     nome: "Arthur Caldeirani",
     funcao: "Field",
     regiao: "RJ1",
     turno: "13h20 - 21h00",
     telefone: "(11) 97374-4452",
     email: "arthur.caldeirani@shopee.com"
-  },
-  {
-    nome: "Cleuber Martins",
-    funcao: "Field",
-    regiao: "RJ1",
-    turno: "13h20 - 21h00",
-    telefone: "(11) 99157-8940",
-    email: "cleuber.martins@shopee.com"
   },
   {
     nome: "Carolina Cruz",
@@ -135,28 +168,12 @@ const fields = [
     email: "carolina.cruz@shopee.com"
   },
   {
-    nome: "Wagner Ferreira",
-    funcao: "Field",
-    regiao: "RJ3",
-    turno: "18:00 - 04:30",
-    telefone: "(11) 96458-1491",
-    email: "wagner.ferreira@shopee.com"
-  },
-  {
     nome: "Alanna Matos",
     funcao: "Field",
     regiao: "GO1",
     turno: "13h20 - 22h00",
     telefone: "(11) 91320-9476",
     email: "alanna.matos@shopee.com"
-  },
-  {
-    nome: "Daniela Costa",
-    funcao: "Field",
-    regiao: "GO1",
-    turno: "18:00 - 06:00",
-    telefone: "(38) 99876-1376",
-    email: "daniela.costa@shopee.com"
   }
 ];
 
@@ -167,7 +184,7 @@ const input = document.getElementById("search");
 const results = document.getElementById("results");
 
 input.addEventListener("input", () => {
-  const valor = input.value.toLowerCase().trim();
+  const valor = normalizar(input.value);
   results.innerHTML = "";
 
   if (!valor) return;
@@ -175,7 +192,7 @@ input.addEventListener("input", () => {
   const sigla = cidadeParaSigla[valor];
 
   if (!sigla) {
-    results.innerHTML = "<p class='empty'>Nenhuma região encontrada.</p>";
+    results.innerHTML = "<p class='empty'>Região não encontrada.</p>";
     return;
   }
 
@@ -202,4 +219,5 @@ input.addEventListener("input", () => {
 
 </body>
 </html>
+
 
