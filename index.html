@@ -1,47 +1,119 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Consulta de Fields</title>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  padding: 20px;
-}
-input {
-  padding: 10px;
-  width: 260px;
-}
-button {
-  padding: 10px;
-  cursor: pointer;
-}
-.card {
-  background: #fff;
-  padding: 15px;
-  margin-top: 15px;
-  border-radius: 8px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <title>Fields por Região</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.1);
+    }
+    .empty {
+      text-align: center;
+      color: #777;
+    }
+  </style>
 </head>
-
 <body>
 
-<h2>🔎 Consulta de Fields por Região</h2>
+<h1>🔎 Buscar Field por Região</h1>
+<input id="search" placeholder="Digite a cidade ou região (ex: Hidrolândia, Duque de Caxias)" />
 
-<input id="busca" placeholder="Digite a região (ex: RJ1, BA2, SPBT)">
-<button onclick="buscar()">Buscar</button>
-
-<div id="resultado"></div>
+<div id="results"></div>
 
 <script>
+/* ===============================
+   MAPA CIDADE → SIGLA
+================================ */
+const cidadeParaSigla = {
+  "duque de caxias": "RJ3",
+  "sao joao do meriti": "RJ1",
+  "campo grande": "RJ2",
+  "cabo frio": "RJ3",
+
+  "goiania": "GO1",
+  "hidrolandia": "GO1",
+
+  "blumenau": "SC1",
+  "criciuma": "SC1",
+  "florianopolis": "SC1",
+  "itajai": "SC1",
+  "joinville": "SC1",
+
+  "camaçari": "BA2",
+  "paulo afonso": "BA2",
+  "ribeira pombal": "BA2",
+  "rio real": "BA2",
+  "simoes filho": "BA2",
+
+  "carpina": "PE2",
+  "jaboatao dos guararapes": "PE2",
+
+  "goiania": "GO1",
+  "hidrolandia": "GO1",
+
+  "betim": "MG2",
+  "juiz de fora": "MG2",
+  "sete lagoas": "MG2",
+  "uberlandia": "MG2",
+
+  "vila velha": "ES1",
+
+  "maringa": "PR1",
+  "campina grande do sul": "PR1",
+  "londrina": "PR1",
+  "ponta grossa": "PR1"
+};
+
+/* ===============================
+   LISTA COMPLETA DE FIELDS
+================================ */
 const fields = [
+  {
+    nome: "Douglas Lima",
+    funcao: "Field",
+    regiao: "RJ2",
+    turno: "06h00 - 14h30",
+    telefone: "(11) 99033-3408",
+    email: "douglas.lima@shopee.com"
+  },
+  {
+    nome: "Fabiano Rodrigues",
+    funcao: "Field",
+    regiao: "RJ2",
+    turno: "05h30 - 13h20",
+    telefone: "(21) 97097-0612",
+    email: "fabiano.rodrigues@shopee.com"
+  },
+  {
+    nome: "Tiago Serafim",
+    funcao: "Field",
+    regiao: "RJ2",
+    turno: "05h30 - 13h20",
+    telefone: "(21) 97097-0612",
+    email: "tiago.serafim@shopee.com"
+  },
   {
     nome: "Arthur Caldeirani",
     funcao: "Field",
-    origem: "RJ1",
+    regiao: "RJ1",
     turno: "13h20 - 21h00",
     telefone: "(11) 97374-4452",
     email: "arthur.caldeirani@shopee.com"
@@ -49,47 +121,85 @@ const fields = [
   {
     nome: "Cleuber Martins",
     funcao: "Field",
-    origem: "RJ1",
+    regiao: "RJ1",
     turno: "13h20 - 21h00",
     telefone: "(11) 99157-8940",
     email: "cleuber.martins@shopee.com"
   },
   {
-    nome: "Douglas Lima",
+    nome: "Carolina Cruz",
     funcao: "Field",
-    origem: "RJ2",
-    turno: "06h00 - 14h30",
-    telefone: "(11) 99033-3408",
-    email: "douglas.lima@shopee.com"
+    regiao: "RJ3",
+    turno: "13h20 - 21h00",
+    telefone: "(21) 99787-2831",
+    email: "carolina.cruz@shopee.com"
+  },
+  {
+    nome: "Wagner Ferreira",
+    funcao: "Field",
+    regiao: "RJ3",
+    turno: "18:00 - 04:30",
+    telefone: "(11) 96458-1491",
+    email: "wagner.ferreira@shopee.com"
+  },
+  {
+    nome: "Alanna Matos",
+    funcao: "Field",
+    regiao: "GO1",
+    turno: "13h20 - 22h00",
+    telefone: "(11) 91320-9476",
+    email: "alanna.matos@shopee.com"
+  },
+  {
+    nome: "Daniela Costa",
+    funcao: "Field",
+    regiao: "GO1",
+    turno: "18:00 - 06:00",
+    telefone: "(38) 99876-1376",
+    email: "daniela.costa@shopee.com"
   }
 ];
 
-function buscar() {
-  const valor = document.getElementById("busca").value.toUpperCase();
-  const resultado = document.getElementById("resultado");
-  resultado.innerHTML = "";
+/* ===============================
+   BUSCA
+================================ */
+const input = document.getElementById("search");
+const results = document.getElementById("results");
 
-  const filtrados = fields.filter(f => f.origem.includes(valor));
+input.addEventListener("input", () => {
+  const valor = input.value.toLowerCase().trim();
+  results.innerHTML = "";
 
-  if (filtrados.length === 0) {
-    resultado.innerHTML = "<p>Nenhum field encontrado.</p>";
+  if (!valor) return;
+
+  const sigla = cidadeParaSigla[valor];
+
+  if (!sigla) {
+    results.innerHTML = "<p class='empty'>Nenhuma região encontrada.</p>";
     return;
   }
 
-  filtrados.forEach(f => {
-    resultado.innerHTML += `
+  const encontrados = fields.filter(f => f.regiao === sigla);
+
+  if (!encontrados.length) {
+    results.innerHTML = "<p class='empty'>Nenhum field para essa região.</p>";
+    return;
+  }
+
+  encontrados.forEach(f => {
+    results.innerHTML += `
       <div class="card">
-        <strong>${f.nome}</strong><br>
-        Função: ${f.funcao}<br>
-        Região: ${f.origem}<br>
-        Turno: ${f.turno}<br>
-        📞 ${f.telefone}<br>
+        <strong>${f.nome}</strong><br/>
+        Função: ${f.funcao}<br/>
+        Turno: ${f.turno}<br/>
+        📞 ${f.telefone}<br/>
         ✉️ ${f.email}
       </div>
     `;
   });
-}
+});
 </script>
 
 </body>
 </html>
+
